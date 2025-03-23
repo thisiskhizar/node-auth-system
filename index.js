@@ -5,6 +5,8 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
+const errorHandler = require("./middleware/errorHandler");
+const authRoutes = require("./routes/auth.routes");
 
 // Load environment variables
 dotenv.config();
@@ -30,6 +32,7 @@ app.use(helmet()); // Set security headers
 app.use(morgan("dev")); // HTTP request logger
 
 // Routes
+app.use("/api/v1/auth", authRoutes);
 
 // Test Route
 app.get("/", (req, res) => {
@@ -37,6 +40,7 @@ app.get("/", (req, res) => {
 });
 
 // Error Handling Middleware
+app.use(errorHandler);
 
 // Connect to Database first, then start the server
 connectDB()
