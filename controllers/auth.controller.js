@@ -45,6 +45,14 @@ const registerUser = async (req, res, next) => {
       return res.status(200).json({
         success: true,
         message: "This email is already registered but not verified. A new verification email has been sent.",
+        user: _.pick(user, [
+          "_id",
+          "firstName",
+          "lastName",
+          "email",
+          "isVerified",
+          "createdAt",
+        ]),
       });
     }
 

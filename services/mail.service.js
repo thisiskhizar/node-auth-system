@@ -59,7 +59,7 @@ const sendResetSuccessEmail = async (email) => {
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
-      subject: "Password Reset Successful - Making Big",
+      subject: "Password Reset Successful - Auth System",
       html: PASSWORD_RESET_SUCCESS_TEMPLATE,
     };
 
@@ -79,7 +79,7 @@ const sendWelcomeEmail = async (email, name) => {
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
-      subject: "Welcome to Making Big",
+      subject: "Welcome to Auth System",
       html: WELCOME_EMAIL_TEMPLATE.replace("{name}", name),
     };
 
