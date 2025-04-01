@@ -27,7 +27,26 @@ const registerUser = async (req, res, next) => {
 
     // Check if user already exists
     let user = await User.findOne({ email });
-    if (user) return next({ statusCode: 400, message: "Email already in use" });
+    if (user && user.isVerified) return next({ statusCode: 400, message: "Email already in use" });
+
+    if (user && !user.isVerified) {
+      // If user exists but is not verified, resend verification email
+      const verificationToken = crypto.randomBytes(32).toString("hex");
+      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+      user.verificationToken = verificationToken;
+      user.verificationTokenExpiresAt = Date.now() + 30 * 60 * 1000; // 30 minutes
+      user.verificationCode = verificationCode;
+      user.verificationCodeExpiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+      await user.save();
+      await sendVerificationEmail(email, verificationToken, verificationCode);
+
+      return res.status(200).json({
+        success: true,
+        message: "This email is already registered but not verified. A new verification email has been sent.",
+      });
+    }
 
     // Hash password
     const saltRounds = 10;
