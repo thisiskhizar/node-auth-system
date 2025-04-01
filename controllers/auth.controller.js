@@ -9,6 +9,12 @@ const {
   forgotPasswordValidation,
   resetPasswordValidation,
 } = require("../middleware/validate");
+const {
+  sendVerificationEmail,
+  sendPasswordResetEmail,
+  sendResetSuccessEmail,
+  sendWelcomeEmail,
+} = require("../services/mail.service"); 
 const _ = require("lodash");
 
 const registerUser = async (req, res, next) => {
@@ -51,6 +57,7 @@ const registerUser = async (req, res, next) => {
     await user.save();
 
     // Send verification email
+    await sendVerificationEmail(email, verificationToken, verificationCode);
 
     // Respond with a safe user object
     res.status(201).json({
@@ -91,6 +98,8 @@ const verifyEmailWithToken = async (req, res, next) => {
     user.verificationCodeExpiresAt = null;
     await user.save();
 
+    await sendWelcomeEmail(user.email, user.firstName);
+
     res.status(200).json({
       success: true,
       message: "Email verified successfully",
@@ -125,6 +134,8 @@ const verifyEmailWithCode = async (req, res, next) => {
     user.verificationCode = null;
     user.verificationCodeExpiresAt = null;
     await user.save();
+
+    await sendWelcomeEmail(user.email, user.firstName);
 
     res.status(200).json({
       success: true,
@@ -169,6 +180,7 @@ const loginUser = async (req, res, next) => {
 
     // Store refresh token in the database (optional but recommended)
     user.refreshToken = refreshToken;
+    user.lastLogin = Date.now();
     await user.save();
 
     // Send refresh token as HTTP-Only Cookie
@@ -294,6 +306,7 @@ const forgotPassword = async (req, res, next) => {
     await user.save();
 
     // Send reset email
+    await sendPasswordResetEmail(user.email, resetToken);
 
     res.status(200).json({
       success: true,
@@ -331,6 +344,7 @@ const resetPassword = async (req, res, next) => {
     await user.save();
 
     // Send password reset success email
+    await sendResetSuccessEmail(user.email);
 
     res.status(200).json({
       success: true,
